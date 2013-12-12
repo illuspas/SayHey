@@ -24,15 +24,23 @@
 @interface RtmpClient : NSObject<AudioRecordDelegate>
 {
     AudioRecoder *mAudioRecord;
+    
     RTMP *pPubRtmp;
     RTMP *pPlayRtmp;
     BOOL isStartPub;
-    SpeexBits ebits; //speex
+    BOOL isStartPlay;
+    
+    SpeexBits ebits; //speex encoder
     int enc_frame_size;
     void *enc_state;
-    short* pcm_buffer;
-    char* output_buffer;
+    char *output_buffer;
+    short *pcm_buffer;
     UInt32 pubTs;
+    
+    SpeexBits dbits;//speex decoder;
+    int dec_frame_size;
+    void* dec_state;
+    
     NSCondition *condition;
     
     id<RtmpClientDelegate> outDelegate;
