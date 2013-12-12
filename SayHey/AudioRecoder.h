@@ -27,7 +27,9 @@
     AudioStreamBasicDescription     mRecordFormat;
     
 }
+
 @property id<AudioRecordDelegate> outDelegate;
+
 -(id)initWIthSampleRate:(int)sampleRate;
 -(void)setAudioRecordDelegate:(id<AudioRecordDelegate>)delegate;
 -(void)startRecord;

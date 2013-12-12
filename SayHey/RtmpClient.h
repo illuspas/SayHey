@@ -15,10 +15,32 @@
 #include <speex/speex.h>
 #include <speex/speex_header.h>
 
-@interface RtmpClient : NSObject<AudioRecordDelegate>
+@protocol RtmpClientDelegate <NSObject>
 
+-(void)EventCallback:(int)event;
+
+@end
+
+@interface RtmpClient : NSObject<AudioRecordDelegate>
+{
+    AudioRecoder *mAudioRecord;
+    RTMP *pPubRtmp;
+    RTMP *pPlayRtmp;
+    BOOL isStartPub;
+    SpeexBits ebits; //speex
+    int enc_frame_size;
+    void *enc_state;
+    short* pcm_buffer;
+    char* output_buffer;
+    UInt32 pubTs;
+    NSCondition *condition;
+    
+    id<RtmpClientDelegate> outDelegate;
+}
 
 -(id)initWithSampleRate:(int)sampleRate withEncoder:(int)audioEncoder;
+
+-(void)setOutDelegate:(id<RtmpClientDelegate>)delegate;
 
 -(void)startPublishWithUrl:(NSString*) rtmpURL;
 -(void)stopPublish;

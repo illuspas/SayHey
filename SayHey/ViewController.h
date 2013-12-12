@@ -7,13 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RtmpClient.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController<RtmpClientDelegate>
+
 @property (weak, nonatomic) IBOutlet UITextField *streamServerText;
 @property (weak, nonatomic) IBOutlet UITextField *pubStreamNameText;
 @property (weak, nonatomic) IBOutlet UITextField *playStreamNameText;
 @property (weak, nonatomic) IBOutlet UIButton *pubBtn;
 @property (weak, nonatomic) IBOutlet UIButton *playBtn;
+@property (weak, nonatomic) IBOutlet UITextView *logView;
+
 
 - (IBAction)clickPubBtn:(id)sender;
 - (IBAction)clickPlayBtn:(id)sender;

@@ -10,19 +10,6 @@
 
 
 @implementation RtmpClient
-{
-    AudioRecoder *mAudioRecord;
-    RTMP *pPubRtmp;
-    RTMP *pPlayRtmp;
-    BOOL isStartPub;
-    SpeexBits ebits; //speex
-    int enc_frame_size;
-    void *enc_state;
-    short* pcm_buffer;
-    char* output_buffer;
-    UInt32 pubTs;
-    NSCondition *condition;
-}
 
 
 void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestamp)
@@ -53,6 +40,11 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
     return self;
 }
 
+-(void)setOutDelegate:(id<RtmpClientDelegate>)delegate
+{
+    outDelegate = delegate;
+}
+
 -(void)startPublishWithUrl:(NSString*) rtmpURL
 {
     NSThread *thread = [[NSThread alloc]initWithTarget:self selector:@selector(openPublishThread:) object:rtmpURL];
@@ -60,7 +52,9 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
 }
 -(void)stopPublish
 {
-    
+    [condition lock];
+    [condition signal];
+    [condition unlock];
 }
 
 -(void)startPlayWithUrl:(NSString*) rtmpURL
@@ -79,7 +73,10 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
     int compression = 6,sample_rate;
     do {
         isStartPub = YES;
-        
+        if(outDelegate)
+        {
+            [outDelegate EventCallback:1000];
+        }
         //1 init speex encoder
         speex_bits_init(&ebits);
         enc_state = speex_encoder_init(&speex_wb_mode);
@@ -96,33 +93,53 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
         if(!RTMP_SetupURL(pPubRtmp, (char*)[rtmpUrl UTF8String]))
         {
             NSLog(@"RTMP_SetupURL error");
-            break;
+            if(outDelegate)
+            {
+                [outDelegate EventCallback:1002];
+            }
+            break; 
         }
         RTMP_EnableWrite(pPubRtmp);
         NSLog(@"RTMP_EnableWrite");
         if (!RTMP_Connect(pPubRtmp, NULL) || !RTMP_ConnectStream(pPubRtmp, 0)) {
             NSLog(@"RTMP_Connect or RTMP_ConnectStream error!");
+            if(outDelegate)
+            {
+                [outDelegate EventCallback:1002];
+            }
             break;
         }
         NSLog(@"RTMP_Connected");
         [mAudioRecord startRecord];
+        if(outDelegate)
+        {
+            [outDelegate EventCallback:1001];
+        }
         
     } while (0);
     [condition lock];
     [condition wait];
     [condition unlock];
+    isStartPub = NO;
     NSLog(@"Stop Publish start release");
+    [mAudioRecord stopRecord];
+    if (RTMP_IsConnected(pPubRtmp)) {
+        RTMP_Close(pPubRtmp);
+    }
+    RTMP_Free(pPubRtmp);
     free(pcm_buffer);
     free(output_buffer);
     speex_bits_destroy(&ebits);
     speex_encoder_destroy(enc_state);
+    if(outDelegate)
+    {
+        [outDelegate EventCallback:1004];
+    }
 }
 
 -(void)openPlayThread:(NSString*) rtmpUrl
 {
-    [condition lock];
-    [condition signal];
-    [condition unlock];
+
 }
 
 -(void)AudioDataOutputBuffer:(char *)audioBuffer bufferSize:(int)size
@@ -132,7 +149,7 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
     memcpy(pcm_buffer, audioBuffer, enc_frame_size * sizeof(short));
     speex_encode_int(enc_state, pcm_buffer, &ebits);
     int enc_size = speex_bits_write(&ebits, output_buffer, enc_frame_size);
-    NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
+   // NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
     char* send_buf = malloc(enc_size + 1);
     memcpy(send_buf, &speex_head, 1);
     memcpy(send_buf + 1, output_buffer, enc_size);
