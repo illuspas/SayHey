@@ -10,7 +10,6 @@
 
 @implementation AudioRecoder
 
-
 void MyInputBufferHandler(void *                                inUserData,
                           AudioQueueRef                         inAQ,
                           AudioQueueBufferRef					inBuffer,
@@ -55,7 +54,8 @@ void MyInputBufferHandler(void *                                inUserData,
     AudioQueueNewInput(&mRecordFormat,
                        MyInputBufferHandler,
                        (__bridge void *)(self) /* userData */,
-                       NULL /* run loop */, NULL /* run loop mode */,
+                       CFRunLoopGetMain(), kCFRunLoopDefaultMode,
+//                       NULL /* run loop */, NULL /* run loop mode */,
                        0 /* flags */, &mQueue);
     size = sizeof(mRecordFormat);
     stat =  AudioQueueGetProperty(mQueue,

@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #import "AudioRecoder.h"
+#import "AudioPlayer.h"
 
 #include <librtmp/rtmp.h>
 #include <librtmp/amf.h>
@@ -24,6 +26,7 @@
 @interface RtmpClient : NSObject<AudioRecordDelegate>
 {
     AudioRecoder *mAudioRecord;
+    AudioPlayer  *mAudioPlayer;
     
     RTMP *pPubRtmp;
     RTMP *pPlayRtmp;

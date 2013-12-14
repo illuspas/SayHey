@@ -56,13 +56,51 @@ int bigTwoByteToInt(char* bytes)
     return num;
 }
 
+void interruptionListener(	void *	inClientData,  UInt32	inInterruptionState)
+{
+
+}
+void propListener(	void *                  inClientData,
+                  AudioSessionPropertyID	inID,
+                  UInt32                  inDataSize,
+                  const void *            inData)
+{
+    
+}
+
 -(id)initWithSampleRate:(int)sampleRate withEncoder:(int)audioEncoder
 {
     self = [super init];
     if(self){
         mAudioRecord = [[AudioRecoder alloc] initWIthSampleRate:sampleRate];
         [mAudioRecord setOutDelegate:self];
+        mAudioPlayer = [[AudioPlayer alloc] initWithSampleRate:sampleRate];
         condition = [[NSCondition alloc] init];
+        
+        OSStatus error = AudioSessionInitialize(NULL, NULL, interruptionListener, (__bridge void *)(self));
+        if (error) printf("ERROR INITIALIZING AUDIO SESSION! %d\n", (int)error);
+        else
+        {
+            UInt32 category = kAudioSessionCategory_PlayAndRecord;
+            error = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(category), &category);
+            if (error) printf("couldn't set audio category!");
+            
+            error = AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, propListener, (__bridge void *)self);
+            if (error) printf("ERROR ADDING AUDIO SESSION PROP LISTENER! %d\n", (int)error);
+            UInt32 inputAvailable = 0;
+            UInt32 size = sizeof(inputAvailable);
+            
+            // we do not want to allow recording if input is not available
+            error = AudioSessionGetProperty(kAudioSessionProperty_AudioInputAvailable, &size, &inputAvailable);
+            if (error) printf("ERROR GETTING INPUT AVAILABILITY! %d\n", (int)error);
+            
+            // we also need to listen to see if input availability changes
+            error = AudioSessionAddPropertyListener(kAudioSessionProperty_AudioInputAvailable, propListener, (__bridge void *)self);
+            if (error) printf("ERROR ADDING AUDIO SESSION PROP LISTENER! %d\n", (int)error);
+            
+            error = AudioSessionSetActive(true); 
+            if (error) printf("AudioSessionSetActive (true) failed");
+        }
     }
     return self;
 }
@@ -98,7 +136,7 @@ int bigTwoByteToInt(char* bytes)
 
 -(void)openPublishThread:(NSString*) rtmpUrl
 {
-    int compression = 6,sample_rate;
+    int quality = 6,sample_rate,vad=1;
     do {
         isStartPub = YES;
         if(outDelegate)
@@ -108,12 +146,13 @@ int bigTwoByteToInt(char* bytes)
         //1 init speex encoder
         speex_bits_init(&ebits);
         enc_state = speex_encoder_init(&speex_wb_mode);
-        speex_encoder_ctl(enc_state, SPEEX_SET_QUALITY, &compression);
+        speex_encoder_ctl(enc_state, SPEEX_SET_QUALITY, &quality);
         speex_encoder_ctl(enc_state, SPEEX_GET_FRAME_SIZE, &enc_frame_size);
         speex_encoder_ctl(enc_state, SPEEX_GET_SAMPLING_RATE, &sample_rate);
+       // speex_encoder_ctl(enc_state, SPEEX_SET_VAD,&vad);
         pcm_buffer = malloc(enc_frame_size * sizeof(short));
         output_buffer = malloc(enc_frame_size * sizeof(char));
-        NSLog(@"Speex Encoder init,enc_frame_size:%d sample_rate:%d\n", enc_frame_size, sample_rate);
+        NSLog(@"Speex Encoder init,enc_frame_size:%d sample_rate:%d vad:%d\n", enc_frame_size, sample_rate,vad);
         
         //2 init rtmp
         pPubRtmp = RTMP_Alloc();
@@ -167,8 +206,9 @@ int bigTwoByteToInt(char* bytes)
 
 -(void)openPlayThread:(NSString*) rtmpUrl
 {
-    short *output_buffer = NULL;
+    
     do {
+        
         if(outDelegate)
         {
             [outDelegate EventCallback:2000];
@@ -177,7 +217,7 @@ int bigTwoByteToInt(char* bytes)
         speex_bits_init(&dbits);
         dec_state = speex_decoder_init(&speex_wb_mode);
         speex_decoder_ctl(dec_state, SPEEX_GET_FRAME_SIZE, &dec_frame_size);
-        output_buffer = malloc(dec_frame_size * sizeof(short));
+        spx_int16_t *input_buffer = malloc(dec_frame_size * sizeof(short));
         
         NSLog(@"Init Speex decoder success frame_size = %d",dec_frame_size);
         
@@ -206,6 +246,10 @@ int bigTwoByteToInt(char* bytes)
             [outDelegate EventCallback:2001];
         }
         NSLog(@"Player RTMP_Connected \n");
+        
+        //3. init AudioPlayer
+        
+        [mAudioPlayer startPlayWithBufferByteSize:dec_frame_size*2];
         RTMPPacket rtmp_pakt = { 0 };
         isStartPlay = YES;
         while (isStartPlay && RTMP_ReadPacket(pPlayRtmp, &rtmp_pakt)) {
@@ -216,8 +260,9 @@ int bigTwoByteToInt(char* bytes)
                     // 处理音频数据包
                    // NSLog(@"AUDIO audio size:%d  head:%d  time:%d\n", rtmp_pakt.m_nBodySize, rtmp_pakt.m_body[0], rtmp_pakt.m_nTimeStamp);
                     speex_bits_read_from(&dbits, rtmp_pakt.m_body + 1, rtmp_pakt.m_nBodySize - 1);
-                    speex_decode_int(dec_state, &dbits, output_buffer);
+                    speex_decode_int(dec_state, &dbits, input_buffer);
                //     putAudioQueue(output_buffer,dec_frame_size);
+                    [mAudioPlayer putAudioData:input_buffer];
                 } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_VIDEO) {
                     // 处理视频数据包
                 } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_INFO) {
@@ -252,7 +297,8 @@ int bigTwoByteToInt(char* bytes)
                             //int MediaSize = bigThreeByteToInt(rtmp_pakt.m_body+1);
                             //  LOGI("FLASH audio size:%d  head:%d time:%d\n", MediaSize, MediaData[0], TiMMER);
                             speex_bits_read_from(&dbits, MediaData + 1, MediaSize - 1);
-                            speex_decode_int(dec_state, &dbits, output_buffer);
+                            speex_decode_int(dec_state, &dbits, input_buffer);
+                            [mAudioPlayer putAudioData:input_buffer];
                           //  putAudioQueue(output_buffer,dec_frame_size);
                         } else if (StreamType == 0x09) {
                             //视频包
@@ -276,6 +322,7 @@ int bigTwoByteToInt(char* bytes)
             isStartPlay = NO;
         }
     } while (0);
+    [mAudioPlayer stopPlay];
     if(outDelegate)
     {
         [outDelegate EventCallback:2004];
@@ -296,7 +343,7 @@ int bigTwoByteToInt(char* bytes)
     memcpy(pcm_buffer, audioBuffer, enc_frame_size * sizeof(short));
     speex_encode_int(enc_state, pcm_buffer, &ebits);
     int enc_size = speex_bits_write(&ebits, output_buffer, enc_frame_size);
-   // NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
+    //NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
     char* send_buf = malloc(enc_size + 1);
     memcpy(send_buf, &speex_head, 1);
     memcpy(send_buf + 1, output_buffer, enc_size);

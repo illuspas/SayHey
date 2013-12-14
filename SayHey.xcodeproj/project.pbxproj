@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9D18B00518507B15009F823F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D18B00418507B15009F823F /* AudioToolbox.framework */; };
+		9D6BA5A31859B8A200FA7D3A /* AudioPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9D6BA5A21859B8A200FA7D3A /* AudioPlayer.m */; };
 		9D7E6C0D1848857D003D9E06 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D7E6C0C1848857D003D9E06 /* UIKit.framework */; };
 		9D7E6C0F1848857D003D9E06 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D7E6C0E1848857D003D9E06 /* Foundation.framework */; };
 		9D7E6C111848857D003D9E06 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D7E6C101848857D003D9E06 /* CoreGraphics.framework */; };
@@ -29,6 +30,8 @@
 
 /* Begin PBXFileReference section */
 		9D18B00418507B15009F823F /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		9D6BA5A11859B8A200FA7D3A /* AudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioPlayer.h; sourceTree = "<group>"; };
+		9D6BA5A21859B8A200FA7D3A /* AudioPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioPlayer.m; sourceTree = "<group>"; };
 		9D7E6C091848857D003D9E06 /* SayHey.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SayHey.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D7E6C0C1848857D003D9E06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9D7E6C0E1848857D003D9E06 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -74,6 +77,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9D6BA5A41859B8C300FA7D3A /* RtmpClient */ = {
+			isa = PBXGroup;
+			children = (
+				9DBE4EB418586379004B8820 /* RtmpClient.h */,
+				9DBE4EB518586379004B8820 /* RtmpClient.m */,
+				9D7E6C2F18488772003D9E06 /* AudioRecoder.h */,
+				9D7E6C3018488772003D9E06 /* AudioRecoder.m */,
+				9D6BA5A11859B8A200FA7D3A /* AudioPlayer.h */,
+				9D6BA5A21859B8A200FA7D3A /* AudioPlayer.m */,
+			);
+			name = RtmpClient;
+			sourceTree = "<group>";
+		};
 		9D7E6C001848857D003D9E06 = {
 			isa = PBXGroup;
 			children = (
@@ -109,15 +125,12 @@
 		9D7E6C121848857D003D9E06 /* SayHey */ = {
 			isa = PBXGroup;
 			children = (
+				9D6BA5A41859B8C300FA7D3A /* RtmpClient */,
 				9D7E6C1B1848857D003D9E06 /* AppDelegate.h */,
 				9D7E6C1C1848857D003D9E06 /* AppDelegate.m */,
 				9D7E6C241848857D003D9E06 /* ViewController.h */,
 				9D7E6C251848857D003D9E06 /* ViewController.m */,
 				9D7E6C271848857D003D9E06 /* ViewController.xib */,
-				9D7E6C2F18488772003D9E06 /* AudioRecoder.h */,
-				9D7E6C3018488772003D9E06 /* AudioRecoder.m */,
-				9DBE4EB418586379004B8820 /* RtmpClient.h */,
-				9DBE4EB518586379004B8820 /* RtmpClient.m */,
 				9D7E6C131848857D003D9E06 /* Supporting Files */,
 			);
 			path = SayHey;
@@ -204,6 +217,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D7E6C191848857D003D9E06 /* main.m in Sources */,
+				9D6BA5A31859B8A200FA7D3A /* AudioPlayer.m in Sources */,
 				9D7E6C1D1848857D003D9E06 /* AppDelegate.m in Sources */,
 				9D7E6C261848857D003D9E06 /* ViewController.m in Sources */,
 				9D7E6C3118488772003D9E06 /* AudioRecoder.m in Sources */,
