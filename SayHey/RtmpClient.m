@@ -149,7 +149,7 @@ void propListener(	void *                  inClientData,
         speex_encoder_ctl(enc_state, SPEEX_SET_QUALITY, &quality);
         speex_encoder_ctl(enc_state, SPEEX_GET_FRAME_SIZE, &enc_frame_size);
         speex_encoder_ctl(enc_state, SPEEX_GET_SAMPLING_RATE, &sample_rate);
-       // speex_encoder_ctl(enc_state, SPEEX_SET_VAD,&vad);
+        speex_encoder_ctl(enc_state, SPEEX_SET_VAD,&vad);
         pcm_buffer = malloc(enc_frame_size * sizeof(short));
         output_buffer = malloc(enc_frame_size * sizeof(char));
         NSLog(@"Speex Encoder init,enc_frame_size:%d sample_rate:%d vad:%d\n", enc_frame_size, sample_rate,vad);
