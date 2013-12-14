@@ -206,7 +206,7 @@ void propListener(	void *                  inClientData,
 
 -(void)openPlayThread:(NSString*) rtmpUrl
 {
-    
+    spx_int16_t *input_buffer;
     do {
         
         if(outDelegate)
@@ -217,7 +217,7 @@ void propListener(	void *                  inClientData,
         speex_bits_init(&dbits);
         dec_state = speex_decoder_init(&speex_wb_mode);
         speex_decoder_ctl(dec_state, SPEEX_GET_FRAME_SIZE, &dec_frame_size);
-        spx_int16_t *input_buffer = malloc(dec_frame_size * sizeof(short));
+        input_buffer = malloc(dec_frame_size * sizeof(short));
         
         NSLog(@"Init Speex decoder success frame_size = %d",dec_frame_size);
         
@@ -331,24 +331,27 @@ void propListener(	void *                  inClientData,
         RTMP_Close(pPlayRtmp);
     }
     RTMP_Free(pPlayRtmp);
-    free(output_buffer);
+    free(input_buffer);
     speex_bits_destroy(&dbits);
     speex_decoder_destroy(dec_state);
 }
 
 -(void)AudioDataOutputBuffer:(char *)audioBuffer bufferSize:(int)size
 {
-    const char speex_head = '\xB6';
-    speex_bits_reset(&ebits);
-    memcpy(pcm_buffer, audioBuffer, enc_frame_size * sizeof(short));
-    speex_encode_int(enc_state, pcm_buffer, &ebits);
-    int enc_size = speex_bits_write(&ebits, output_buffer, enc_frame_size);
-    //NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
-    char* send_buf = malloc(enc_size + 1);
-    memcpy(send_buf, &speex_head, 1);
-    memcpy(send_buf + 1, output_buffer, enc_size);
-    send_pkt(pPubRtmp,send_buf, enc_size + 1, RTMP_PACKET_TYPE_AUDIO, pubTs += 20);
-    free(send_buf);
+    if (isStartPub) {
+        const char speex_head = '\xB6';
+        speex_bits_reset(&ebits);
+        memcpy(pcm_buffer, audioBuffer, enc_frame_size * sizeof(short));
+        speex_encode_int(enc_state, pcm_buffer, &ebits);
+        int enc_size = speex_bits_write(&ebits, output_buffer, enc_frame_size);
+        //NSLog(@"AudioDataOutputBuffer size=%d  encSize=%d",size,enc_size);
+        char* send_buf = malloc(enc_size + 1);
+        memcpy(send_buf, &speex_head, 1);
+        memcpy(send_buf + 1, output_buffer, enc_size);
+        send_pkt(pPubRtmp,send_buf, enc_size + 1, RTMP_PACKET_TYPE_AUDIO, pubTs += 20);
+        free(send_buf);
+    }
+
 }
 
 
