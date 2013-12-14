@@ -265,8 +265,13 @@ void propListener(	void *                  inClientData,
                     [mAudioPlayer putAudioData:input_buffer];
                 } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_VIDEO) {
                     // 处理视频数据包
+                } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_INVOKE) {
+                    // 处理invoke包
+                    NSLog(@"RTMP_PACKET_TYPE_INVOKE");
+                    RTMP_ClientPacket(pPlayRtmp,&rtmp_pakt);
                 } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_INFO) {
                     // 处理信息包
+                    //NSLog(@"RTMP_PACKET_TYPE_INFO");
                 } else if (rtmp_pakt.m_packetType == RTMP_PACKET_TYPE_FLASH_VIDEO) {
                     // 其他数据
                     int index = 0;
