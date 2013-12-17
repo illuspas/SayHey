@@ -19,7 +19,6 @@ void AQBufferCallback(void *inUserData,
     
     if(THIS->isStartPlay)
     {
-        
         inCompleteAQBuffer->mPacketDescriptionCount = THIS->mBufferByteSize/2;
         inCompleteAQBuffer->mAudioDataByteSize =THIS->mBufferByteSize;
         if(read(THIS->pip_fd[0], inCompleteAQBuffer->mAudioData, THIS->mBufferByteSize) > 0 ){
@@ -76,7 +75,7 @@ void AQBufferCallback(void *inUserData,
 -(void)putAudioData:(short*)pcmData
 {
     if (!isStartPlay) {
-        memccpy(mBuffers[mIndex]->mAudioData, pcmData, mBufferByteSize, 1);
+        memcpy(mBuffers[mIndex]->mAudioData, pcmData, mBufferByteSize);
         mBuffers[mIndex]->mAudioDataByteSize = mBufferByteSize;
         mBuffers[mIndex]->mPacketDescriptionCount = mBufferByteSize/2;
         OSStatus status = AudioQueueEnqueueBuffer(mQueue, mBuffers[mIndex], 0, NULL);
