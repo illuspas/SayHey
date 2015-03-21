@@ -19,12 +19,11 @@ void AQBufferCallback(void *inUserData,
     
     if(THIS->isStartPlay)
     {
-        inCompleteAQBuffer->mPacketDescriptionCount = THIS->mBufferByteSize/2;
-        inCompleteAQBuffer->mAudioDataByteSize =THIS->mBufferByteSize;
-        if(read(THIS->pip_fd[0], inCompleteAQBuffer->mAudioData, THIS->mBufferByteSize) > 0 ){
-            AudioQueueEnqueueBuffer(inAQ, inCompleteAQBuffer, 0, NULL);
+        ssize_t ret =read(THIS->pip_fd[0], inCompleteAQBuffer->mAudioData, THIS->mBufferByteSize);
+        if( ret != THIS->mBufferByteSize ) {
+            memset(inCompleteAQBuffer->mAudioData,0,THIS->mBufferByteSize);
         }
-    }
+        AudioQueueEnqueueBuffer(inAQ, inCompleteAQBuffer, 0, NULL);    }
     
 }
 
@@ -56,6 +55,8 @@ void AQBufferCallback(void *inUserData,
         status =  AudioQueueAllocateBufferWithPacketDescriptions(mQueue, mBufferByteSize, 0, &mBuffers[i]);
     }
     pipe(pip_fd);
+    int flags = fcntl(pip_fd[0], F_GETFL);
+    fcntl(pip_fd[0],F_SETFL,flags | O_NONBLOCK);
 }
 
 -(void)stopPlay
@@ -65,6 +66,9 @@ void AQBufferCallback(void *inUserData,
     AudioQueueStop(mQueue, true);
     if (mQueue)
 	{
+        for (int i=0; i<kNumberBuffers; i++) {
+            AudioQueueFreeBuffer(mQueue,mBuffers[i]);
+        }
 		AudioQueueDispose(mQueue, true);
 		mQueue = NULL;
         isStartPlay = NO;
@@ -80,7 +84,7 @@ void AQBufferCallback(void *inUserData,
         mBuffers[mIndex]->mPacketDescriptionCount = mBufferByteSize/2;
         OSStatus status = AudioQueueEnqueueBuffer(mQueue, mBuffers[mIndex], 0, NULL);
         NSLog(@"fill audio queue buffer[%d]",mIndex);
-        if(mIndex == 2) {
+        if(mIndex == kNumberBuffers - 1) {
             isStartPlay = YES;
             mIndex = 0;
             status = AudioQueueStart(mQueue, NULL);
@@ -88,8 +92,7 @@ void AQBufferCallback(void *inUserData,
             mIndex++;
         }
     }else {
-        int ret = write(pip_fd[1], pcmData, mBufferByteSize);
-        //NSLog(@"putAudioData to pipe %d",ret);
+        write(pip_fd[1], pcmData, mBufferByteSize);
     }
     
 }
