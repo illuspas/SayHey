@@ -311,13 +311,13 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					/Users/ALiang/workspace/iOS/SayHey/include,
+					"$(SRCROOT)/include",
 				);
 				INFOPLIST_FILE = "SayHey/SayHey-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/ALiang/workspace/iOS/SayHey/lib,
+					"$(SRCROOT)/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "";
@@ -333,13 +333,13 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					/Users/ALiang/workspace/iOS/SayHey/include,
+					"$(SRCROOT)/include",
 				);
 				INFOPLIST_FILE = "SayHey/SayHey-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/ALiang/workspace/iOS/SayHey/lib,
+					"$(SRCROOT)/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "";
