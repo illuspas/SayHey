@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "RtmpClient.h"
 
-@interface ViewController : UIViewController<RtmpClientDelegate>
+@interface ViewController : UIViewController<RtmpClientDelegate,UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *streamServerText;
 @property (weak, nonatomic) IBOutlet UITextField *pubStreamNameText;

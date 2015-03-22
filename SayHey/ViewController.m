@@ -24,6 +24,9 @@
     [super viewDidLoad];
     mRtmpClient = [[RtmpClient alloc] initWithSampleRate:16000 withEncoder:0];
     [mRtmpClient setOutDelegate:self];
+    [_streamServerText setDelegate:self];
+    [_pubStreamNameText setDelegate:self];
+    [_playStreamNameText setDelegate:self];
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -41,6 +44,12 @@
     [self setPlayBtn:nil];
     [self setLogView:nil];
     [super viewDidUnload];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return YES;
 }
 
 - (IBAction)clickPubBtn:(id)sender {

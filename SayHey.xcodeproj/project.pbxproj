@@ -23,7 +23,6 @@
 		9D7E6C3118488772003D9E06 /* AudioRecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9D7E6C3018488772003D9E06 /* AudioRecoder.m */; };
 		9DBE4EAF185861E9004B8820 /* librtmp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DBE4EAC185861E9004B8820 /* librtmp.a */; };
 		9DBE4EB0185861E9004B8820 /* libspeex.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DBE4EAD185861E9004B8820 /* libspeex.a */; };
-		9DBE4EB1185861E9004B8820 /* libspeexdsp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DBE4EAE185861E9004B8820 /* libspeexdsp.a */; };
 		9DBE4EB3185861FA004B8820 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DBE4EB2185861FA004B8820 /* libz.dylib */; };
 		9DBE4EB618586379004B8820 /* RtmpClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DBE4EB518586379004B8820 /* RtmpClient.m */; };
 /* End PBXBuildFile section */
@@ -66,7 +65,6 @@
 				9DBE4EB3185861FA004B8820 /* libz.dylib in Frameworks */,
 				9DBE4EAF185861E9004B8820 /* librtmp.a in Frameworks */,
 				9DBE4EB0185861E9004B8820 /* libspeex.a in Frameworks */,
-				9DBE4EB1185861E9004B8820 /* libspeexdsp.a in Frameworks */,
 				9D18B00518507B15009F823F /* AudioToolbox.framework in Frameworks */,
 				9D7E6C0D1848857D003D9E06 /* UIKit.framework in Frameworks */,
 				9D7E6C0F1848857D003D9E06 /* Foundation.framework in Frameworks */,
