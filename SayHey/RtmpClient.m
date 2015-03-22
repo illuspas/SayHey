@@ -29,33 +29,6 @@ void send_pkt(RTMP* pRtmp,char* buf, int buflen, int type, unsigned int timestam
     RTMPPacket_Free(&rtmp_pakt);
 }
 
-int bigFourByteToInt(char* bytes)
-{
-    int num = 0;
-    num += (int) bytes[0] << 24;
-    num += (int) bytes[1] << 16;
-    num += (int) bytes[2] << 8;
-    num += (int) bytes[3];
-    return num;
-}
-
-int bigThreeByteToInt(char* bytes)
-{
-    int num = 0;
-    num += (int) bytes[0] << 16;
-    num += (int) bytes[1] << 8;
-    num += (int) bytes[2];
-    return num;
-}
-
-int bigTwoByteToInt(char* bytes)
-{
-    int num = 0;
-    num += (int) bytes[0] << 8;
-    num += (int) bytes[1];
-    return num;
-}
-
 void interruptionListener(	void *	inClientData,  UInt32	inInterruptionState)
 {
 
@@ -285,15 +258,15 @@ void propListener(	void *                  inClientData,
                         
                         StreamType = rtmp_pakt.m_body[index];
                         index += 1;
-                        MediaSize = bigThreeByteToInt(rtmp_pakt.m_body + index);
+                        MediaSize = AMF_DecodeInt24(rtmp_pakt.m_body + index);
                         index += 3;
-                        TiMMER = bigThreeByteToInt(rtmp_pakt.m_body + index);
+                        TiMMER = AMF_DecodeInt24(rtmp_pakt.m_body + index);
                         index += 3;
-                        Reserve = bigFourByteToInt(rtmp_pakt.m_body + index);
+                        Reserve = AMF_DecodeInt32(rtmp_pakt.m_body + index);
                         index += 4;
                         MediaData = rtmp_pakt.m_body + index;
                         index += MediaSize;
-                        TagLen = bigFourByteToInt(rtmp_pakt.m_body + index);
+                        TagLen = AMF_DecodeInt32(rtmp_pakt.m_body + index);
                         index += 4;
                         //NSLog(@"bodySize:%d   index:%d",rtmp_pakt.m_nBodySize,index);
                         //LOGI("StreamType:%d MediaSize:%d  TiMMER:%d TagLen:%d\n", StreamType, MediaSize, TiMMER, TagLen);
